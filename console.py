@@ -114,47 +114,26 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def do_create(self, args):
+
         """ Create an object of any class"""
-        if not args:
+        try:
+            if not args:
+                raise SyntaxError()
+            arg_list = args.split(" ")
+            kw = {}
+            for arg in arg_list[1:]:
+                arg_splited = arg.split("=")
+                arg_splited[1] = eval(arg_splited[1])
+                if type (arg_splited) is str:
+                    arg_splited[1] = arg_splited[1].replace("_", " ").replace('""', '\\"')
+                kw[arg_splited[0]] = arg_splited[1]
+        except SyntaxError:
             print("** class name missing **")
-            return
-        args = args.split()
-
-        class_name = args[0]
-
-        if class_name not in self.classes:
-            print("** class doesn't exist **")
-            return
-
-        params = {}
-        for param in args[1:]:
-            if '=' in param:
-                key, value = param.split('=')
-                # Unescape double quotes
-                value = value.replace('\\"', '"')
-                # Replace underscores with spaces
-                value = value.replace('_', ' ')
-            # Check value types
-            if value.startswith('"') and value.endswith('"'):
-                params[key] = value[1:-1]  # Strip double quotes
-            elif '.' in value:
-                try:
-                    params[key] = float(value)
-                except ValueError:
-                    pass  # Ignore invalid float values
-            else:
-                try:
-                    params[key] = int(value)
-                except ValueError:
-                    pass  # Ignore invalid integer values
-
-        instance = self.classes[class_name](**params)
-        instance.save()
-        print(instance.id)    
-
-        instance = self.classes[class_name](**params)
-        instance.save()
-        print(instance.id)
+        except NameError:
+            print("** class name doesn't exist**")
+        new_instance = HBNBCommand.classes[arg_list[0]](**kw)
+        print(new_instance.id)
+        new_instance.save()
 
     def help_create(self):
         """ Help information for the create method """
