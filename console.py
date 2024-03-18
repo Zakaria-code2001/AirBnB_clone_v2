@@ -113,14 +113,14 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, args):
+    def do_create(self, arg):
 
         """ Create an object of any class"""
         if not arg:
             print("** class name missing **")
             return
 
-        args = shlex.split(arg)
+        args = arg.split()
 
         class_name = args[0]
 
@@ -130,14 +130,19 @@ class HBNBCommand(cmd.Cmd):
 
         params = {}
         for param in args[1:]:
-            match = re.match(r'^([a-zA-Z_]\w*)=(\".*\"|[\d.]+|\d+)$', param)
-            if match:
-                key, value = match.groups()
+            try:
+                key, value = param.split('=')
+                value = value.replace('\\"', '"').replace('_', ' ')
                 if value.startswith('"') and value.endswith('"'):
-                    value = value[1:-1].replace('\\"', '"').replace('_', ' ')
-                params[key] = eval(value)  # Evaluate string, integer, or float
-            else:
+                    value = value[1:-1]
+                elif '.' in value:
+                    value = float(value)
+                else:
+                    value = int(value)
+                params[key] = value
+            except ValueError:
                 print(f"Invalid parameter: {param}. Skipping.")
+
 
         instance = self.classes[class_name](**params)
         instance.save()
