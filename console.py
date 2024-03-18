@@ -116,24 +116,32 @@ class HBNBCommand(cmd.Cmd):
     def do_create(self, args):
 
         """ Create an object of any class"""
-        try:
-            if not args:
-                raise SyntaxError()
-            arg_list = args.split(" ")
-            kw = {}
-            for arg in arg_list[1:]:
-                arg_splited = arg.split("=")
-                arg_splited[1] = eval(arg_splited[1])
-                if type (arg_splited) is str:
-                    arg_splited[1] = arg_splited[1].replace("_", " ").replace('""', '\\"')
-                kw[arg_splited[0]] = arg_splited[1]
-        except SyntaxError:
+        if not arg:
             print("** class name missing **")
-        except NameError:
-            print("** class name doesn't exist**")
-        new_instance = HBNBCommand.classes[arg_list[0]](**kw)
-        print(new_instance.id)
-        new_instance.save()
+            return
+
+        args = shlex.split(arg)
+
+        class_name = args[0]
+
+        if class_name not in self.classes:
+            print("** class doesn't exist **")
+            return
+
+        params = {}
+        for param in args[1:]:
+            match = re.match(r'^([a-zA-Z_]\w*)=(\".*\"|[\d.]+|\d+)$', param)
+            if match:
+                key, value = match.groups()
+                if value.startswith('"') and value.endswith('"'):
+                    value = value[1:-1].replace('\\"', '"').replace('_', ' ')
+                params[key] = eval(value)  # Evaluate string, integer, or float
+            else:
+                print(f"Invalid parameter: {param}. Skipping.")
+
+        instance = self.classes[class_name](**params)
+        instance.save()
+        print(instance.id)
 
     def help_create(self):
         """ Help information for the create method """
