@@ -118,7 +118,7 @@ class HBNBCommand(cmd.Cmd):
         if not args:
             print("** class name missing **")
             return
-        args = arg.split()
+        args = args.split()
 
         class_name = args[0]
 
@@ -129,11 +129,11 @@ class HBNBCommand(cmd.Cmd):
         params = {}
         for param in args[1:]:
             if '=' in param:
-            key, value = param.split('=')
-            # Unescape double quotes
-            value = value.replace('\\"', '"')
-            # Replace underscores with spaces
-            value = value.replace('_', ' ')
+                key, value = param.split('=')
+                # Unescape double quotes
+                value = value.replace('\\"', '"')
+                # Replace underscores with spaces
+                value = value.replace('_', ' ')
             # Check value types
             if value.startswith('"') and value.endswith('"'):
                 params[key] = value[1:-1]  # Strip double quotes
@@ -152,9 +152,9 @@ class HBNBCommand(cmd.Cmd):
         instance.save()
         print(instance.id)    
 
-    instance = self.classes[class_name](**params)
-    instance.save()
-    print(instance.id)
+        instance = self.classes[class_name](**params)
+        instance.save()
+        print(instance.id)
 
     def help_create(self):
         """ Help information for the create method """
