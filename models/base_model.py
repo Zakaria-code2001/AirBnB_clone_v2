@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""This module defines a base class for all models in our hbnb clone"""
+"""This module defines a basw class for all models in our hbnb clone"""
 
 import models
 import uuid
@@ -27,9 +27,11 @@ class BaseModel:
             self.created_at = self.updated_at = datetime.utcnow()
             for key, value in kwargs.items():
                 if key in ('created_at', 'updated_at'):
-                    setattr(self,
-                            key,
-                            datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%f'))
+                    if '.' in value:
+                        format_str = '%Y-%m-%d %H:%M:%S.%f'
+                    else:
+                        format_str = '%Y-%m-%d %H:%M:%S'
+                    setattr(self, key, datetime.strptime(value, format_str))
                 elif key != '__class__':
                     setattr(self, key, value)
 
