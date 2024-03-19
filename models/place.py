@@ -27,9 +27,6 @@ place_amenity = Table(
         primary_key=True
     )
 )
-"""Represents the many to many relationship table
-between Place and Amenity records.
-"""
 
 
 class Place(BaseModel, Base):
