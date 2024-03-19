@@ -1,4 +1,4 @@
-from sqlalchemy import String, Column, ForeignKey, Integer, Float, Table
+from sqlalchemy import Table, Column, String, ForeignKey, Integer, Float, MetaData
 from sqlalchemy.orm import relationship
 from models.base_model import BaseModel, Base
 from os import getenv
@@ -18,10 +18,14 @@ class Place(BaseModel, Base):
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
 
-    # Define the association table
-    place_amenity = Table('place_amenity', Base.metadata,
-                          Column('place_id', String(60), ForeignKey('places.id'), primary_key=True),
-                          Column('amenity_id', String(60), ForeignKey('amenities.id'), primary_key=True))
+    metadata = MetaData()
+
+    # Check if table already exists
+    if 'place_amenity' not in metadata.tables:
+        # Define the association table
+        place_amenity = Table('place_amenity', metadata,
+                              Column('place_id', String(60), ForeignKey('places.id'), primary_key=True),
+                              Column('amenity_id', String(60), ForeignKey('amenities.id'), primary_key=True))
 
     if getenv("HBNB_TYPE_STORAGE") == "db":
         reviews = relationship('Review', backref='place', cascade='all, delete-orphan')
