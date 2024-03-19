@@ -6,6 +6,9 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import Column, String
 
 class Amenity(BaseModel, Base):
+    """
+    Amenity inherits from BaseModel and Base
+    """
     __tablename__ = 'amenities'
     name = Column(String(128), nullable=False)
     if getenv("HBNB_TYPE_STORAGE") == "db":
