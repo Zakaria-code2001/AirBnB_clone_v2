@@ -21,8 +21,9 @@ class BaseModel:
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow())
 
     def __init__(self, *args, **kwargs):
-        """Instantiation of base model class
-        Args:
+        """
+        Instantiation of base model class
+            Args:
             args: it won't be used
             kwargs: arguments for the constructor of the BaseModel
         Attributes:
@@ -33,7 +34,11 @@ class BaseModel:
         if kwargs:
             for key, value in kwargs.items():
                 if key == "created_at" or key == "updated_at":
-                    value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
+                    try:
+                        value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
+                    except ValueError:
+                        # If parsing fails with the first format, try the alternate format
+                        value = datetime.strptime(value, "%Y-%m-%d %H:%M:%S.%f")
                 if key != "__class__":
                     setattr(self, key, value)
             if "id" not in kwargs.keys():
@@ -46,7 +51,7 @@ class BaseModel:
         else:
             self.id = str(uuid.uuid4())
             self.created_at = self.updated_at = datetime.now()
-
+    
     def __str__(self):
         """returns a string
         Return:
