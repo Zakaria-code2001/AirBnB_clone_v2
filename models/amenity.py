@@ -1,6 +1,7 @@
 from sqlalchemy import Table, Column, String, ForeignKey
 from sqlalchemy.orm import relationship
 from models.base_model import BaseModel, Base
+from os import getenv
 
 class Amenity(BaseModel, Base):
     """
