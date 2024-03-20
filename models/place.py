@@ -1,28 +1,29 @@
 #!/usr/bin/python
-""" holds class Place"""
+""" Holds class Place """
 import models
 from models.base_model import BaseModel, Base
 from os import getenv
-import sqlalchemy
 from sqlalchemy import Column, String, Integer, Float, ForeignKey, Table
 from sqlalchemy.orm import relationship
 
+# Define the table for the relationship between places and amenities if using database storage
 if getenv("HBNB_TYPE_STORAGE") == 'db':
     place_amenity = Table('place_amenity', Base.metadata,
                           Column('place_id', String(60),
-                                 ForeignKey('places.id', onupdate='CASCADE',
-                                            ondelete='CASCADE'),
+                                 ForeignKey('places.id', onupdate='CASCADE', ondelete='CASCADE'),
                                  primary_key=True),
                           Column('amenity_id', String(60),
-                                 ForeignKey('amenities.id', onupdate='CASCADE',
-                                            ondelete='CASCADE'),
+                                 ForeignKey('amenities.id', onupdate='CASCADE', ondelete='CASCADE'),
                                  primary_key=True))
 
-
+# Define the Place class
 class Place(BaseModel, Base):
-    """Representation of Place """
-    if models.storage_t == 'db':
-        __tablename__ = 'places'
+    """ Representation of Place """
+    # Set table name for database storage
+    __tablename__ = 'places'
+
+    # Define columns for database storage
+    if getenv("HBNB_TYPE_STORAGE") == 'db':
         city_id = Column(String(60), ForeignKey('cities.id'), nullable=False)
         user_id = Column(String(60), ForeignKey('users.id'), nullable=False)
         name = Column(String(128), nullable=False)
@@ -34,10 +35,9 @@ class Place(BaseModel, Base):
         latitude = Column(Float, nullable=True)
         longitude = Column(Float, nullable=True)
         reviews = relationship("Review", backref="place")
-        amenities = relationship("Amenity", secondary="place_amenity",
-                                 backref="place_amenities",
-                                 viewonly=False)
+        amenities = relationship("Amenity", secondary="place_amenity", backref="place_amenities", viewonly=False)
     else:
+        # Define attributes for file storage
         city_id = ""
         user_id = ""
         name = ""
@@ -50,14 +50,16 @@ class Place(BaseModel, Base):
         longitude = 0.0
         amenity_ids = []
 
+    # Define __init__ method
     def __init__(self, *args, **kwargs):
-        """initializes Place"""
+        """ Initializes Place """
         super().__init__(*args, **kwargs)
 
-    if models.storage_t != 'db':
+    # Define property methods for file storage
+    if getenv("HBNB_TYPE_STORAGE") != 'db':
         @property
         def reviews(self):
-            """getter attribute returns the list of Review instances"""
+            """ Getter attribute returns the list of Review instances """
             from models.review import Review
             review_list = []
             all_reviews = models.storage.all(Review)
@@ -68,7 +70,7 @@ class Place(BaseModel, Base):
 
         @property
         def amenities(self):
-            """getter attribute returns the list of Amenity instances"""
+            """ Getter attribute returns the list of Amenity instances """
             from models.amenity import Amenity
             amenity_list = []
             all_amenities = models.storage.all(Amenity)
