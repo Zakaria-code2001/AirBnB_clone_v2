@@ -15,7 +15,7 @@ class City(BaseModel, Base):
     name = Column(String(128), nullable=False)
 
     if models.storage_t == "db":
-        places = relationship("Place", backref="cities")
+        places = relationship('Place', backref='cities',cascade='all, delete-orphan')
 
     def __init__(self, *args, **kwargs):
         """initializes city"""
