@@ -1,78 +1,72 @@
 #!/usr/bin/python3
-# Fabfile to create and distribute an archive to a web server.
-import os.path
-from datetime import datetime
-from fabric.api import env
-from fabric.api import local
-from fabric.api import put
-from fabric.api import run
+"""
+a Fabric script that generates a .tgz archive
+from the contents of the web_static folder of the AirBnB Clone repo
+"""
+from fabric.operations import local, put, run
+from datetime import datetime as d
+from fabric.api import *
 
 env.hosts = ['100.26.136.33', '54.90.34.106']
+created_archive = None
 
 
 def do_pack():
-    """Create a tar gzipped archive of the directory web_static."""
-    dt = datetime.utcnow()
-    file = "versions/web_static_{}{}{}{}{}{}.tgz".format(dt.year,
-                                                         dt.month,
-                                                         dt.day,
-                                                         dt.hour,
-                                                         dt.minute,
-                                                         dt.second)
-    if os.path.isdir("versions") is False:
-        if local("mkdir -p versions").failed is True:
-            return None
-    if local("tar -cvzf {} web_static".format(file)).failed is True:
+    """ generates a .tgz archive """
+    name = "versions/web_static_" + str(d.now().year)
+    name += str(d.now().month) + str(d.now().day) + str(d.now().hour)
+    name += str(d.now().minute) + str(d.now().second) + ".tgz"
+    result = local("mkdir -p versions; tar -cvzf \"%s\" web_static" % name)
+    if result.failed:
         return None
-    return file
+    else:
+        return name
 
 
 def do_deploy(archive_path):
-    """Distributes an archive to a web server.
-
-    Args:
-        archive_path (str): The path of the archive to distribute.
-    Returns:
-        If the file doesn't exist at archive_path or an error occurs - False.
-        Otherwise - True.
-    """
-    if os.path.isfile(archive_path) is False:
+    """ uploads the archive to servers """
+    destination = "/tmp/" + archive_path.split("/")[-1]
+    result = put(archive_path, "/tmp/")
+    if result.failed:
         return False
-    file = archive_path.split("/")[-1]
-    name = file.split(".")[0]
-
-    if put(archive_path, "/tmp/{}".format(file)).failed is True:
+    filename = archive_path.split("/")[-1]
+    f = filename.split(".")[0]
+    directory = "/data/web_static/releases/" + f
+    run_res = run("mkdir -p \"%s\"" % directory)
+    if run_res.failed:
         return False
-    if run("rm -rf /data/web_static/releases/{}/".
-           format(name)).failed is True:
+    run_res = run("tar -xzf %s -C %s" % (destination, directory))
+    if run_res.failed:
         return False
-    if run("mkdir -p /data/web_static/releases/{}/".
-           format(name)).failed is True:
+    run_res = run("rm %s" % destination)
+    if run_res:
         return False
-    if run("tar -xzf /tmp/{} -C /data/web_static/releases/{}/".
-           format(file, name)).failed is True:
+    web = directory + "/web_static/*"
+    run_res = run("mv %s %s" % (web, directory))
+    if run_res.failed:
         return False
-    if run("rm /tmp/{}".format(file)).failed is True:
+    web = web[0:-2]
+    run_res = run("rm -rf %s" % web)
+    if run_res.failed:
         return False
-    if run("mv /data/web_static/releases/{}/web_static/* "
-           "/data/web_static/releases/{}/".format(name, name)).failed is True:
+    run_res = run("rm -rf /data/web_static/current")
+    if run_res.failed:
         return False
-    if run("rm -rf /data/web_static/releases/{}/web_static".
-           format(name)).failed is True:
-        return False
-    if run("rm -rf /data/web_static/current").failed is True:
-        return False
-    if run("ln -s /data/web_static/releases/{}/ /data/web_static/current".
-           format(name)).failed is True:
+    run_res = run("ln -s %s /data/web_static/current" % directory)
+    if run_res.failed:
         return False
     return True
 
 
 def deploy():
-    """Create and distribute an archive to a web server."""
-    file = do_pack()
-    if file is None:
-        return False
-    return do_deploy(file)
-
-
+    """ creates an archive and uploads it to servers"""
+    global created_archive
+    if created_archive is None:
+        name = do_pack()
+        if name is None:
+            return False
+        else:
+            created_archive = name
+        return do_deploy(name)
+    else:
+        return do_deploy(created_archive)

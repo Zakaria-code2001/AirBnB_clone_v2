@@ -1,19 +1,17 @@
 #!/usr/bin/python3
-"""
-Fabric script (based on the file 3-deploy_web_static.py)
-that deletes out-of-date archives
-"""
-
+# Fabfile to delete out-of-date archives.
 import os
 from fabric.api import *
-env.hosts = ['100.26.136.33', '54.90.34.106']
 
+env.hosts = ['100.26.136.33', '54.90.34.106']
 
 
 def do_clean(number=0):
     """Delete out-of-date archives.
+
     Args:
         number (int): The number of archives to keep.
+
     If number is 0 or 1, keeps only the most recent archive. If
     number is 2, keeps the most and second-most recent archives,
     etc.
