@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 """
-Fabric script (based on the file 1-pack_web_static.py)
-that distributes an archive to your web servers
+Fabric script for deploying a web application archive to web servers.
 """
 
 from fabric.api import env, local, put, run
@@ -12,8 +11,12 @@ env.hosts = ['100.26.136.33', '54.90.34.106']
 
 
 def do_pack():
-    """Return the archive path if the archive has been correctly generated.
-    Otherwise, it should return None."""
+    """
+    Create a compressed archive of the web_static folder.
+
+    Returns:
+        str: Path to the created archive if successful, None otherwise.
+    """
     try:
         date = datetime.now().strftime("%Y%m%d%H%M%S")
         if not isdir("versions"):
@@ -26,7 +29,15 @@ def do_pack():
 
 
 def do_deploy(archive_path):
-    """Distributes an archive to the web servers."""
+    """
+    Distribute the web application archive to the web servers.
+
+    Args:
+        archive_path (str): Path to the web application archive.
+
+    Returns:
+        bool: True if deployment succeeds, False otherwise.
+    """
     if not exists(archive_path):
         return False
     try:
@@ -47,8 +58,12 @@ def do_deploy(archive_path):
 
 
 def deploy():
-    """Returns True if all operations have been done correctly,
-    otherwise returns False."""
+    """
+    Deploy the web application to the web servers.
+
+    Returns:
+        bool: True if deployment succeeds, False otherwise.
+    """
     archive_path = do_pack()
     if archive_path is None:
         return False
