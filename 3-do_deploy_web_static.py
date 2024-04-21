@@ -7,26 +7,27 @@ that distributes an archive to your web servers
 from fabric.api import env, local, put, run
 from datetime import datetime
 from os.path import exists, isdir
+
 env.hosts = ['100.26.136.33', '54.90.34.106']
 
 
 def do_pack():
-    """return the archive path if the archive has been correctly generated.
-    Otherwise, it should return None"""
+    """Return the archive path if the archive has been correctly generated.
+    Otherwise, it should return None."""
     try:
         date = datetime.now().strftime("%Y%m%d%H%M%S")
-        if isdir("versions") is False:
+        if not isdir("versions"):
             local("mkdir versions")
         file_name = "versions/web_static_{}.tgz".format(date)
         local("tar -cvzf {} web_static".format(file_name))
         return file_name
-    except:
+    except Exception:
         return None
 
 
 def do_deploy(archive_path):
-    """distributes an archive to the web servers"""
-    if exists(archive_path) is False:
+    """Distributes an archive to the web servers."""
+    if not exists(archive_path):
         return False
     try:
         file_n = archive_path.split("/")[-1]
@@ -41,13 +42,13 @@ def do_deploy(archive_path):
         run('rm -rf /data/web_static/current')
         run('ln -s {}{}/ /data/web_static/current'.format(path, no_ext))
         return True
-    except:
+    except Exception:
         return False
 
 
 def deploy():
     """Returns True if all operations have been done correctly,
-    otherwise returns False"""
+    otherwise returns False."""
     archive_path = do_pack()
     if archive_path is None:
         return False
