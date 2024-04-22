@@ -12,6 +12,7 @@ from models.amenity import Amenity
 from models.place import Place
 from models.review import Review
 
+
 class DBStorage():
     """
     Db engine for the project
@@ -31,6 +32,7 @@ class DBStorage():
                                       pool_pre_ping=True)
         if 'HBNB_ENV' == 'test':
             Base.metadata.drop_all(bind=self.__engine)
+
     def all(self, cls=None):
         """
         query on the current database session for
@@ -70,6 +72,7 @@ class DBStorage():
         """
         if obj:
             self.__session.delete(obj)
+
     def reload(self):
         """
         create all tables in the database
@@ -84,3 +87,4 @@ class DBStorage():
         """ call remove() method on the private session attribute
             (self.__session) or close() on the class Session """
         self.__session.close()
+        self.__session = None
